@@ -174,7 +174,7 @@ i.e. the function cannot vary ``too quickly''.
 \end{defn}
 If $f$ is 1-Lipschitz, and $P=\mathcal{N}(0, I_d)$, and using empirical risk minimization of the previous section, then a lower-bound on the amount of data required to estimate $f$ up to error $\epsilon$ grows as $\epsilon^{-d}$. The curse of dimensionality also crops up in e.g. using a single-layer perceptron to approximate a high-dimensional function, where the statistical error is cursed by dimension. 
 
-However, in most cases, data are not simply points in a high-dimensional space: rather, the are \textbf{signals} on a low-dimensional \textbf{manifold} embedded in a high-dimensional input space $\mathcal{X}$ (Fig.~\ref{fig:geom-func-spaces}). The aim of an inductive prior (which is what Geometric Deep Learning is all about) is to reduce the statistical error, whilst keeping the approximation error low, by limiting ourselves to hypothesis spaces which respect the symmetries of the data domain.
+However, in most cases, data are not simply points in a high-dimensional space: rather, the are \textbf{signals} on a low-dimensional \textbf{manifold} embedded in a high-dimensional input space $\mathcal{X}$ (Fig.~\ref{fig:geom-func-spaces}). The aim of an inductive prior (which is what Geometric Deep Learning is all about) is to reduce the size of the hypothesis space and thereby reduce statistical error, whilst also keeping the approximation error low, by limiting ourselves to hypothesis spaces which respect the symmetries of the data domain.
 
 \begin{figure}
 \begin{center}
@@ -184,6 +184,38 @@ However, in most cases, data are not simply points in a high-dimensional space: 
 }
 \label{fig:geom-func-spaces}
 \end{figure}
+
+\section{Geometric priors}
+
+\subsection{Notation}
+\begin{itemize}[noitemsep]
+\item Assume that data ``lives'' on a domain $\Omega$. Domain is a \textbf{set}, possibly with additional structure
+\item Data is a \textbf{signal} (function) on the domain $x : \Omega \rightarrow \mathcal{C}$
+\item Dimensions of vector space $\mathcal{C}$ are \textbf{channels}
+\item The space of $\mathcal{C}$-valued signals is $\mathcal{X}$, where $\mathcal{X}(\Omega, \mathcal{C}) = \{x: \Omega \rightarrow \mathcal{C} \}$
+\end{itemize}
+
+For example, an $n \times n$ RGB image can be considered a function which maps an element of the domain $\Omega = \mathbb{Z}_n \times \mathbb{Z}_n$ onto an element of the vector space $\mathcal{C}=\mathbb{R}^3$. 
+
+\begin{defn}[Addition and scalar multiplication on signals] \label{defn:add-mul-signals}
+Let $x,y \in \mathcal{X}$. Define addition and scalar multiplication of signals through pointwise multiplication over the domain: 
+\begin{equation}
+(\alpha x + \beta y)(u) = \alpha x(u) + \beta y(u)
+\end{equation}
+for all $u \in \Omega$ with scalars $\alpha, \beta \in \mathbb{R}$.
+\end{defn}
+
+\begin{thm}[Space of signals is a Hilbert space]
+Assuming that $\mathcal{C}$ has an inner product $\langle v, w \rangle_\mathcal{C}$, and there exists a measure $\mu$ on $\Omega$, we can define an inner product on $\mathcal{X}(\Omega, \mathcal{C})$ as
+\begin{equation}
+\langle x, y \rangle = \int_\Omega \langle x(u), y(u) \rangle_\mathcal{C}\ \mathrm{d}\mu(u). \label{eq:inner-prod-signals}
+\end{equation}
+Given this inner product, and the fact that Defn.~\ref{defn:add-mul-signals} implies that $\mathcal{X}$ is a vector space, then the space of signals $\mathcal{X}$ is therefore a Hilbert space.
+\end{thm}
+
+If $\Omega$ is a finite set then $\mu$ can be chosen as the counting measure and the integral in Eq.\eqref{eq:inner-prod-signals} becomes a sum. The existence of an inner product allows us to perform ``pattern matching'', for example comparing a signal $x$ to a filter $y$. There can be cases where the domain itself are the data: e,g. meshes, or graphs without node or edge features. But we can often turn the domain into a signal on the domain itself, e.g. the adjacency matrix $A_{ij}$ is a signal on $\Omega \times \Omega$.
+
+Note that, in the most general case, data are maps from a point in the domain to a vector space \textbf{indexed} by the point in the data domain: $x: \Omega \rightarrow \mathcal{C}_u$. For example, the tangent space for a point $u$ on a spherical manifold $\Omega$ varies for every point $u$. In this case, the data aren't functions but \textbf{fields} (or \textbf{sections of a bundle}), and the space $\mathcal{C}_u$ is called a \textbf{fiber}. For simplicity we'll only work with function spaces $\mathcal{X}(\Omega, \mathcal{C})$ for now.
 
 \newpage
 \bibliography{geometric-dl.bib} 
