@@ -275,15 +275,47 @@ such that
 \end{equation}
 for all $\f{g}_1, \f{g}_2 \in \f{G}$. In the case where $V$ has a finite dimension $n$, it is common to choose a basis for $V$ and identify $GL(V)$ with $GL(n, K)$, the group of $n \times n$ invertible matrices on the field $K$.
 \end{defn}
-In practice, even when the vector space $\Omega$ is infinite, one must always computationally discretize to find a finite grid, and therefore a finite-dimensional representation exists. I.e. we can find a map $\rho : \f{G} \rightarrow \mathbb{C}^{n \times n}$ that assigns a each group element $\f{g}$ an invertible matrix $\rho(\f{g})$. A representation is called \textbf{unitary} or \textbf{orthogonal} when the matrix $\rho(\f{g})$ is unitary or orthogonal for all $\f{g} \in \f{G}$.
+Note that the particular form of the representation (and how it operates on elements of the vector space) will depend upon the dimensionality of the vector space it is acting on, even when considering the very same underlying group. In practice, even when the vector space $\Omega$ is infinite, one must always computationally discretize to find a finite grid, and therefore a finite-dimensional representation exists. I.e. we can find a map $\rho : \f{G} \rightarrow \mathbb{C}^{n \times n}$ that assigns a each group element $\f{g}$ an invertible matrix $\rho(\f{g})$. A representation is called \textbf{unitary} or \textbf{orthogonal} when the matrix $\rho(\f{g})$ is unitary or orthogonal for all $\f{g} \in \f{G}$.
 
 \begin{figure}
 \begin{center}
 \includegraphics[width=\columnwidth]{../figures/group-action-linearity.png}  
 \end{center}
-\caption{Group action is linear on the space of signals. A) Consider a binary image $x$, a point on the underlying 2D grid $u$, and a symmetry group element such as a translation of the image to the right by $t$ pixels. Eq.\eqref{eq:group-action-on-signal} shows the effect of the group action on the image, which is to act inversely on the image domain: i.e. the image grid slides to the left by $t$ pixels and the same image is placed at that location . B) Linearity on signals means that if we add two signals, and then apply a symmetry transformation, that is the same as applying the symmetry transformation on each signal separately and then adding the result together. 
+\caption{Group action is linear on the space of signals. A) Consider a binary image $x$, a point on the underlying 2D grid $u$, and a symmetry group element such as a translation of the image to the left by $t$ pixels. Eq.\eqref{eq:group-action-on-signal} shows the effect of the group action on the image, which is to act inversely on the image domain: i.e. the image grid slides to the right by $t$ pixels and the same image is placed at that location. B) Linearity on signals means that if we add two signals, and then apply a symmetry transformation, that is the same as applying the symmetry transformation on each signal separately and then adding the result together. 
 }
 \label{fig:linearity-group-action}
+\end{figure}
+
+\subsection{Invariant and equivariant functions}
+The symmetry of the domain $\Omega$ underlying signals $\mathcal{X}(\Omega)$ imposes structure on the function mapping the signal to the target $\mathcal{Y}$. Two important cases are invariant and equivariant functions.
+
+\begin{defn}[Invariant function]
+A function $f: \mathcal{X}(\Omega) \rightarrow \mathcal{Y}$ is $\f{G}$-invariant if 
+\begin{equation}
+f(\rho(\f{g})x)=f(x) \label{eq:inuivariant-fcn}
+\end{equation}
+for all $\f{g} \in \f{G}$ and $x \in \mathcal{X}(\Omega)$. I.e. its output is unaffected by the group action on the input.
+\end{defn}
+
+An example of an invariant function might be in image classification, where an image contains a particular object (e.g.\ a dog or a cat), and the abstract function $f$ mapping the image onto the true label is invariant to the position of the object in the image. In such settings, we often implement a convolutional neural network as the model. However, CNNs are not shift-invariant, but shift-equivariant.
+
+\begin{defn}[Equivariant function]
+A function $f: \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{X}(\Omega', \mathcal{C}')$ is $\f{G}$-equivariant if 
+\begin{equation}
+f(\rho(\f{g})x) = \rho'(\f{g})f(x) \label{eq:equivariant-fcn}
+\end{equation}
+for all $\f{g} \in \f{G}$. I.e. group action on the input affects the output in the same way, albeit with the possibility of the input and output spaces having different domains.
+\end{defn}
+
+A prototypical example of shift-equivariance is image segmentation: a segment mask must follow shifts in the input image. In deep learning, it is often not a good idea to build an invariant representation ``too soon''. In order to recognise an object, a model must first recognize its parts -- this is why neural networks should be deep. If representations of parts are invariant, then information about the \textit{relative pose} of parts is lost, see Fig.~\ref{fig:invariance-equivariance}A. Hence we want equivariant, not invariant, layers for the early parts of the network.
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=\columnwidth]{../figures/invariance-equivariance.png}  
+\end{center}
+\caption{Equivariant layers are necessary in the early part of a neural network. A) In order for a neural network to recognise a face, it must first build representations of each of the parts: eyes, ears, mouth, nose. If the entire face is rotation invariant, that does not mean that each of the parts should be represented as rotation invariant, otherwise the relative orientation between the parts can be lost. B) On the left we have a sequential neural network, with layers $f_i$ and corresponding input signals $\mathcal{X}_{i-1}$. The arrows from left-to-right denote a symmetry transformation on the feature space. The image says that applying the symmetry transformation on the input (e.g. $\mathcal{X}_0$) and then applying the layer (e.g. $f_1$), should be the same as applying the layer and then applying the same symmetry transformation on the output(albeit on a different representation, e.g. $\mathcal{X}_1$). In other words, each layer obeys Eq.\eqref{eq:equivariant-fcn}. I.e. $f_i \circ \rho_{i-1}(\f{g}) = \rho_i(\f{g}) \circ f_i$ for each layer $i$. C) In practice, many neural network architectures will not generalize consistently across \textbf{orbits} of input. In this example of a CNN, rotating the input image will not result in a rotated representation but rather send the input space to different places in the feature space, because CNNs are not generally rotation equivariant.
+}
+\label{fig:invariance-equivariance}
 \end{figure}
 
 \newpage
