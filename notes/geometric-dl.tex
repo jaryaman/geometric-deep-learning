@@ -318,6 +318,16 @@ A prototypical example of shift-equivariance is image segmentation: a segment ma
 \label{fig:invariance-equivariance}
 \end{figure}
 
+\subsection{Isomorphisms and automorphisms}
+
+\begin{defn}[Isomorphism]
+An isomorphism is a structure-preserving mapping $\eta: \Omega \rightarrow \Omega'$ between two structures $\Omega$ and $\Omega'$ that can be reversed by an inverse mapping. For example, if $\Omega = \{0,1,2\}$ and $\Omega' = \{a, b, c\}$, then the bijection $\eta(0)=a$, $\eta(1)=b$, $\eta(2)=c$ is an set isomorphism.
+\end{defn}
+
+\begin{defn}[Automorphism]
+An automorphism is an isomorphism $\tau : \Omega \rightarrow \Omega$, mapping a mathematical object onto itself. For example, if $\Omega = \{0,1,2\}$ then the cyclic shift $\tau(u) = u + 1\ \text{mod}\ 3$ is an automorphism.
+\end{defn}
+
 \newpage
 \bibliography{geometric-dl.bib} 
 
