@@ -328,6 +328,35 @@ An isomorphism is a structure-preserving mapping $\eta: \Omega \rightarrow \Omeg
 An automorphism is an isomorphism $\tau : \Omega \rightarrow \Omega$, mapping a mathematical object onto itself. For example, if $\Omega = \{0,1,2\}$ then the cyclic shift $\tau(u) = u + 1\ \text{mod}\ 3$ is an automorphism.
 \end{defn}
 
+\subsection{Scale separation prior}
+A scale separation prior makes the assumption that it is possible to separate interactions across scales: that local interactions propagate upwards to higher scales, rather than small scales directly interacting with large scales. A multiscale coarsening of a domain $\Omega$ into a hierarchy $\Omega_1,...,\Omega_J$ requires us to also define a hierarchy of signals $\mathcal{X}_j(\Omega_j, \mathcal{C}_j) \defeq \{x_j: \Omega_j \rightarrow \mathcal{C}_j\}$. 
+\begin{defn}[Locally stable function (informal)]
+A function $f:\mathcal{X}(\Omega) \rightarrow \mathcal{Y}$ is locally stable at scale $j$ if it admits a factorization of the form 
+\begin{equation}
+f \approx f_j \circ P_j \label{eq:coarse-grain-composition}
+\end{equation}
+where $P_j: \mathcal{X}(\Omega) \rightarrow \mathcal{X}(\Omega_j)$ is a non-linear \textbf{coarse graining} and $f_j: \mathcal{X}(\Omega_j) \rightarrow \mathcal{Y}$.
+\end{defn}
+The reason for why coarse graining is useful is because \textbf{local decompositions are stable with respect to small deformations of the domain}. \cite{Bronstein21} discuss by analogy how decomposing signals in terms of \textbf{wavelets} (a local decomposition) instead of Fourier transforms (a global decomposition) renders the representation stable when we only have \textit{approximate} invariance to e.g. translations (see Fig.~\ref{fig:approx-invar}).
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.7\columnwidth]{../figures/coarse-graining.jpg}  
+\end{center}
+\caption{Illustration of scale separation for image classification. The classifier $f'$ defined on signals on the coarse grid $\mathcal{X}(\Omega')$ should satisfy Eq.\eqref{eq:coarse-grain-composition}.
+}
+\label{fig:coarse-graining}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\includegraphics[width=0.7\columnwidth]{../figures/automorphism-group.jpg}  
+\end{center}
+\caption{Defining ``approximate'' invariance as transformations of the domain ``near'' to a group orbit. The set of all bijective mappings from $\Omega$ to itself is the set automorphism group $\mathrm{Aut}(\Omega)$. A symmetry group, such as the translation group, is a subgroup of $\mathrm{Aut}(\Omega)$. It is possible to define a distance metric between a group element of $\mathrm{Aut}(\Omega)$ and a given symmetry group. It is possible to define an approximate invariance group $\mathfrak{G}$ (gray ring) by admitting group elements $\tau \in \mathrm{Aut}(\Omega)$ within some tolerance of the pure symmetries (black circle). In this case, the ring represents the set of shifts with small distortions.
+}
+\label{fig:approx-invar}
+\end{figure}
+
 \newpage
 \bibliography{geometric-dl.bib} 
 
