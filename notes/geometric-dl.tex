@@ -55,7 +55,7 @@
 \newcommand{\nindep}{\not\!\perp\!\!\!\perp}
 \def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
 
-%PUT ME LAST--------------------------------------------------
+
 \usepackage[colorlinks=true
 ,urlcolor=blue
 ,anchorcolor=blue
@@ -70,7 +70,7 @@
 
 \makeatother %Put this last of all
 
-
+\renewcommand{\d}[1]{\ensuremath{\operatorname{d}\!{#1}}}
 \newcommand{\defeq}{\coloneqq}
 \newcommand{\overbar}[1]{\mkern 1.5mu\overline{\mkern-1.5mu#1\mkern-1.5mu}\mkern 1.5mu}
 
@@ -352,10 +352,53 @@ The reason for why coarse graining is useful is because \textbf{local decomposit
 \begin{center}
 \includegraphics[width=0.7\columnwidth]{../figures/automorphism-group.jpg}  
 \end{center}
-\caption{Defining ``approximate'' invariance as transformations of the domain ``near'' to a group orbit. The set of all bijective mappings from $\Omega$ to itself is the set automorphism group $\mathrm{Aut}(\Omega)$. A symmetry group, such as the translation group, is a subgroup of $\mathrm{Aut}(\Omega)$. It is possible to define a distance metric between a group element of $\mathrm{Aut}(\Omega)$ and a given symmetry group. It is possible to define an approximate invariance group $\mathfrak{G}$ (gray ring) by admitting group elements $\tau \in \mathrm{Aut}(\Omega)$ within some tolerance of the pure symmetries (black circle). In this case, the ring represents the set of shifts with small distortions.
+\caption{Defining ``approximate'' invariance as transformations of the domain ``near'' to a group orbit. The set of all bijective mappings from $\Omega$ to itself is the set automorphism group $\mathrm{Aut}(\Omega)$. A symmetry group, such as the translation group, is a subgroup of $\mathrm{Aut}(\Omega)$. It is possible to define a distance metric between a group element of $\mathrm{Aut}(\Omega)$ and a given symmetry group. It is possible to define an approximate invariance group $\f{G}$ (gray ring) by admitting group elements $\tau \in \mathrm{Aut}(\Omega)$ within some tolerance of the pure symmetries (black circle). In this case, the ring represents the set of shifts with small distortions.
 }
 \label{fig:approx-invar}
 \end{figure}
+
+\section{Geometric Deep Learning Blueprint}
+
+In order to create an expressive, but also $\f{G}$-invariant, function we must introduce a non-linearity. This is evident because if a function $f$ is linear and $\f{G}$-\textbf{invariant}, then it satisfies
+\begin{equation}
+f(x) = \frac{1}{\mu(\f{G})} \int_{\f{G}} f(\f{g}\cdot x) \d \mu(\f{g}) =  f\left( \frac{1}{\mu(\f{G})} \int_{\f{G}} \f{g}\cdot x \d \mu(\f{g})\right)
+\end{equation}
+(where $\mu(\f{g})$ is called the Haar measure of the group), meaning that the function only depends on the $\f{G}$-average of $x$. In the case of an image and translation, this would entail only the average RGB color of the input over all translations, which is clearly a very narrow family of functions.
+
+However, the family of linear equivariants, combined with pointwise non-linear maps, provides a much more expressive family of functions:
+\begin{thm}[Linear equivariants composed with non-linearities are equivariant]
+If a function on a signal $B: \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{X}(\Omega, \mathcal{C}')$ is $\f{G}$-equivariant (Eq.\eqref{eq:equivariant-fcn}), then the composition 
+\begin{equation}
+U \defeq (\sigma \circ B): \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{X}(\Omega, \mathcal{C}'')
+\end{equation}
+is also $\f{G}$-equivariant, where $\sigma : \mathcal{C}(\Omega, \mathcal{C}') \rightarrow \mathcal{X}(\Omega, \mathcal{C}'')$ is an element-wise non-linear function, i.e. 
+\begin{equation}
+(\sigma(x))(u) \defeq \sigma(x(u))
+\end{equation}
+\end{thm}
+By composing $\f{G}$-equivariants with group averages ($\f{G}$-invariants $A \circ U : \mathcal{X}(\Omega, \mathcal{C})\rightarrow \mathcal{C}''$), it can be shown that a shallow `geometric' network can approximate any $\f{G}$-invariant function to an arbitrary precision (this is a kind of Universal Approximation Theorem). 
+
+However, as discussed, there is a tension between shallow \textbf{global} invariance and deformation stability. This motivates considering instead \textbf{localised} equivariant maps:
+\begin{defn}[Localised equivariant maps]
+Assuming that the domain $\Omega$ is equipped with a distance metric $d$, we call an equivariant map $U$ ``localised'' if $(Ux)(u)$ depends only on the values of $x(v)$ for $\mathcal{N}_u = \{v : d(u, v) \leq r\}$ for some small radius $r$. The set $\mathcal{N}_u$ we call the \textbf{receptive field}.
+\end{defn}
+
+A single layer of local equivariant map $U$ cannot approximate functions with long-range interactions. However a composition of several local equivariant maps $U_J \circ U_{J-1} \circ ... \circ U_1$ increases the receptive field of the composed function, while preserving the stability properties of local equivariants. The receptive field is further increased by interleaving downsampling operators that coarsen the domain.
+
+\begin{defn}[Geometric Deep Learning Blueprint]
+Let $\Omega$ and $\Omega'$ be domains, $\f{G}$ a symmetry group over $\Omega$, and write $\Omega' \subseteq \Omega$ if $\Omega'$ can be considered a compact version of $\Omega$. Define the following building blocks: 
+\begin{itemize}
+\item Linear $\f{G}$-equivariant layer $B: \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{X}(\Omega', \mathcal{C}')$ satisfying $B(\f{g}\cdot x)= \f{g}\cdot B(x)$ for all $\f{g} \in \f{G}$ and $x \in \mathcal{X}(\Omega, \mathcal{C})$.
+\item Nonlinearity $\sigma : \mathcal{C} \rightarrow \mathcal{C}'$ applied element-wise as $(\sigma(x))(u) = \sigma(x(u))$.
+\item Local pooling (coarsening) $P: \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{X}(\Omega', \mathcal{C})$, such that $\Omega' \subseteq \Omega$.
+\item $\f{G}$-invariant layer (global pooling) $A : \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{Y}$ satisfying $A(\f{g}\cdot x) = A(x)$ for all $\f{g} \in \mathcal{G}$ and $x \in \mathcal{X}(\Omega, \mathcal{C})$.
+\end{itemize}
+Using these blocks allows constructing $\f{G}$-invariant functions $f: \mathcal{X}(\Omega, \mathcal{C}) \rightarrow \mathcal{Y}$ of the form
+\begin{equation}
+f = A \circ \sigma_J \circ B_J \circ P_{J-1} \circ ... \circ P_1 \circ \sigma_1 \circ B_1
+\end{equation}
+where the blocks are selected such that the output space of each block matches the input space of the next one. Different blocks may exploit different choices of symmetry groups $\f{G}$.
+\end{defn}
 
 \newpage
 \bibliography{geometric-dl.bib} 
